@@ -1,0 +1,23 @@
+version: "3"
+services:
+  edgedb:
+    image: edgedb/edgedb:2.5
+    environment:
+      EDGEDB_SERVER_SECURITY: insecure_dev_mode
+      EDGEDB_SERVER_ADMIN_UI: enabled
+      EDGEDB_SERVER_PORT: 10700
+    volumes:
+      - ./dbschema:/dbschema/
+      - edgedb_data:/var/lib/edgedb/data
+    ports:
+      - "10700:10700"
+  vault:
+    image: vault:1.12.1
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_DEV_ROOT_TOKEN_ID: "dev-test-token"
+    ports:
+      - "8200:8200"
+
+volumes:
+  edgedb_data:
