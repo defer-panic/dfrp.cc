@@ -32,3 +32,4 @@ go.work
 
 /.dbschema/
 .env
+/bin/
