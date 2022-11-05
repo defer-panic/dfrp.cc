@@ -23,7 +23,7 @@ func NewService(storage Storage) *Service {
 func (s *Service) Shorten(ctx context.Context, input model.ShortenInput) (*model.Shortening, error) {
 	var (
 		id         = uuid.New().ID()
-		identifier = input.Identifier.OrElse(Shorten(id, input.RawURL))
+		identifier = input.Identifier.OrElse(Shorten(id))
 	)
 
 	shortening, err := s.storage.Put(ctx, identifier, input.RawURL)

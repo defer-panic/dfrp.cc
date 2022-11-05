@@ -65,7 +65,7 @@ func HandleShorten(shortener shortener) echo.HandlerFunc {
 				return err
 			}
 
-			return c.JSON(status, shortenResponse{Message: msg})
+			return echo.NewHTTPError(status, msg)
 		}
 
 		shortURL, err := shorten.PrependBaseURL(config.Get().BaseURL, shortening.Identifier)

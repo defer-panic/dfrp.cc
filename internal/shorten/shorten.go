@@ -11,7 +11,7 @@ const alphabet = "ynAJfoSgdXHB5VasEMtcbPCr1uNZ4LG723ehWkvwYR6KpxjTm8iQUFqz9D"
 
 var alphabetLen = uint32(len(alphabet))
 
-func Shorten(id uint32, src string) string {
+func Shorten(id uint32) string {
 	var (
 		digits  []uint32
 		num     = id

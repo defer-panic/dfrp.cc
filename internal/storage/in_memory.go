@@ -17,6 +17,10 @@ func NewInMemory() *inMemory {
 }
 
 func (s *inMemory) Put(_ context.Context, identifier string, url string) (*model.Shortening, error) {
+	if _, exists := s.m.Load(identifier); exists {
+		return nil, model.ErrIdentifierExists
+	}
+
 	shortening := model.Shortening{
 		Identifier:  identifier,
 		OriginalURL: url,
@@ -26,24 +30,6 @@ func (s *inMemory) Put(_ context.Context, identifier string, url string) (*model
 	s.m.Store(identifier, shortening)
 
 	return &shortening, nil
-}
-
-func (s *inMemory) Lookup(_ context.Context, url string) (bool, error) {
-	var found bool
-
-	// ok for tests, but not for production
-	s.m.Range(func(key, value any) bool {
-		shortening := value.(model.Shortening)
-
-		if shortening.OriginalURL == url {
-			found = true
-			return false
-		}
-
-		return true
-	})
-
-	return found, nil
 }
 
 func (s *inMemory) Get(_ context.Context, identifier string) (*model.Shortening, error) {

@@ -11,7 +11,7 @@ type requestValidator struct {
 	v *validator.Validate
 }
 
-func newRequestValidator() *requestValidator {
+func NewValidator() *requestValidator {
 	return &requestValidator{
 		v: validator.New(),
 	}
