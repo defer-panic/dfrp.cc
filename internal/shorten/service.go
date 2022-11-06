@@ -2,6 +2,7 @@ package shorten
 
 import (
 	"context"
+	"log"
 
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/google/uuid"
@@ -10,6 +11,7 @@ import (
 type Storage interface {
 	Put(ctx context.Context, identifier, url string) (*model.Shortening, error)
 	Get(ctx context.Context, identifier string) (*model.Shortening, error)
+	IncrementVisits(ctx context.Context, identifier string) error
 }
 
 type Service struct {
@@ -34,11 +36,17 @@ func (s *Service) Shorten(ctx context.Context, input model.ShortenInput) (*model
 	return shortening, nil
 }
 
-func (s *Service) GetRedirectURL(ctx context.Context, identifier string) (string, error) {
+func (s *Service) Redirect(ctx context.Context, identifier string) (string, error) {
 	shortening, err := s.storage.Get(ctx, identifier)
 	if err != nil {
 		return "", err
 	}
+
+	defer func() {
+		if err := s.storage.IncrementVisits(ctx, identifier); err != nil {
+			log.Printf("failed to increment visits for identifier %q: %v", identifier, err)
+		}
+	}()
 
 	return shortening.OriginalURL, nil
 }

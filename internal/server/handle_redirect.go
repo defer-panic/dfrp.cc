@@ -15,14 +15,14 @@ type redirectResponse struct {
 }
 
 type redirecter interface {
-	GetRedirectURL(ctx context.Context, identifier string) (string, error)
+	Redirect(ctx context.Context, identifier string) (string, error)
 }
 
 func HandleRedirect(redirecter redirecter) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		identifier := c.Param("identifier")
 
-		redirectURL, err := redirecter.GetRedirectURL(c.Request().Context(), identifier)
+		redirectURL, err := redirecter.Redirect(c.Request().Context(), identifier)
 		if err != nil {
 			if errors.Is(err, model.ErrNotFound) {
 				return c.JSON(

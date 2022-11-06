@@ -65,31 +65,36 @@ func TestService_Shorten(t *testing.T) {
 	})
 }
 
-func TestService_GetRedirectURL(t *testing.T) {
+func TestService_Redirect(t *testing.T) {
 	t.Run("returns redirect URL for a given identifier", func(t *testing.T) {
 		const identifier = "google"
 
 		var (
-			svc   = shorten.NewService(storage.NewInMemory())
-			input = model.ShortenInput{
+			inMemoryStorage = storage.NewInMemory()
+			svc             = shorten.NewService(inMemoryStorage)
+			input           = model.ShortenInput{
 				RawURL:     "https://www.google.com",
 				Identifier: Some(identifier),
 			}
 		)
 
-		_, err := svc.Shorten(context.Background(), input)
+		shortening, err := svc.Shorten(context.Background(), input)
 		require.NoError(t, err)
 
-		redirectURL, err := svc.GetRedirectURL(context.Background(), identifier)
+		redirectURL, err := svc.Redirect(context.Background(), identifier)
 		require.NoError(t, err)
 
+		updatedShortening, err := inMemoryStorage.Get(context.Background(), identifier)
+		require.NoError(t, err)
+
+		assert.True(t, updatedShortening.Visits-shortening.Visits == 1)
 		assert.Equal(t, "https://www.google.com", redirectURL)
 	})
 
 	t.Run("returns error if identifier is not found", func(t *testing.T) {
 		var svc = shorten.NewService(storage.NewInMemory())
 
-		_, err := svc.GetRedirectURL(context.Background(), "google")
+		_, err := svc.Redirect(context.Background(), "google")
 		assert.ErrorIs(t, err, model.ErrNotFound)
 	})
 }

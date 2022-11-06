@@ -21,7 +21,7 @@ func NewEdgeDB(client *edgedb.Client) *edge {
 func (e *edge) Put(ctx context.Context, identifier, url string) (*model.Shortening, error) {
 	const (
 		op    = "storage.edge.Put"
-		query = `INSERT Shortening {
+		query = `insert Shortening {
 			identifier := <str>$0,
 			original_url := <str>$1,
 			created_at := <datetime>$2
@@ -31,6 +31,7 @@ func (e *edge) Put(ctx context.Context, identifier, url string) (*model.Shorteni
 	shortening := &model.Shortening{
 		Identifier:  identifier,
 		OriginalURL: url,
+		Visits:      0,
 		CreatedAt:   time.Now().UTC(),
 	}
 
@@ -57,11 +58,15 @@ func (e *edge) Put(ctx context.Context, identifier, url string) (*model.Shorteni
 }
 
 func (e *edge) Get(ctx context.Context, identifier string) (*model.Shortening, error) {
-	const query = `SELECT Shortening{identifier, original_url, created_at} filter .identifier = <str>$0`
+	const (
+		op    = "storage.edge.Get"
+		query = `select Shortening{identifier, original_url, created_at} filter .identifier = <str>$0`
+	)
+
 	var shortenings []model.Shortening
 
 	if err := e.client.Query(ctx, query, &shortenings, identifier); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
 	if len(shortenings) == 0 {
@@ -69,4 +74,22 @@ func (e *edge) Get(ctx context.Context, identifier string) (*model.Shortening, e
 	}
 
 	return &shortenings[0], nil
+}
+
+func (e *edge) IncrementVisits(ctx context.Context, identifer string) error {
+	const (
+		op    = "storage.edge.IncrementVisits"
+		query = `update Shortening
+						 filter .identifier = <str>$0
+						 set {
+						 	visits := .visits + 1,
+							updated_at := datetime_of_transaction()
+						}`
+	)
+
+	if err := e.client.Execute(ctx, query, identifer); err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+
+	return nil
 }
