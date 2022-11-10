@@ -10,11 +10,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/defer-panic/url-shortener-api/internal/auth"
 	"github.com/defer-panic/url-shortener-api/internal/config"
 	"github.com/defer-panic/url-shortener-api/internal/db"
+	"github.com/defer-panic/url-shortener-api/internal/github"
 	"github.com/defer-panic/url-shortener-api/internal/server"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/defer-panic/url-shortener-api/internal/storage"
+	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
+	"github.com/defer-panic/url-shortener-api/internal/storage/user"
 )
 
 func main() {
@@ -27,9 +30,17 @@ func main() {
 	}
 
 	var (
-		edgeStorage = storage.NewEdgeDB(edgeClient.Client())
-		service     = shorten.NewService(edgeStorage)
-		srv         = server.New(service)
+		shorteningStorage = shortening.NewEdgeDB(edgeClient.Client())
+		userStorage       = user.NewEdgeDB(edgeClient.Client())
+		shortener         = shorten.NewService(shorteningStorage)
+		githubClient      = github.NewClient()
+		authenticator     = auth.NewService(
+			githubClient,
+			userStorage,
+			config.Get().GitHub.ClientID,
+			config.Get().GitHub.ClientSecret,
+		)
+		srv = server.New(shortener, authenticator)
 	)
 
 	srv.AddCloser(edgeClient.Close)

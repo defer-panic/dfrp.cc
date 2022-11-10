@@ -10,7 +10,7 @@ import (
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/server"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/defer-panic/url-shortener-api/internal/storage"
+	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +21,7 @@ func TestHandleShorten(t *testing.T) {
 		const payload = `{"url": "https://www.google.com"}`
 
 		var (
-			shortener = shorten.NewService(storage.NewInMemory())
+			shortener = shorten.NewService(shortening.NewInMemory())
 			handler   = server.HandleShorten(shortener)
 			recorder  = httptest.NewRecorder()
 			request   = httptest.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
@@ -47,7 +47,7 @@ func TestHandleShorten(t *testing.T) {
 		const payload = `{"url": "invalid"}`
 
 		var (
-			shortener = shorten.NewService(storage.NewInMemory())
+			shortener = shorten.NewService(shortening.NewInMemory())
 			handler   = server.HandleShorten(shortener)
 			recorder  = httptest.NewRecorder()
 			request   = httptest.NewRequest(http.MethodPost, "/", strings.NewReader(payload))
@@ -68,7 +68,7 @@ func TestHandleShorten(t *testing.T) {
 		const payload = `{"url": "https://www.google.com", "identifier": "google"}`
 
 		var (
-			shortener = shorten.NewService(storage.NewInMemory())
+			shortener = shorten.NewService(shortening.NewInMemory())
 			handler   = server.HandleShorten(shortener)
 			recorder  = httptest.NewRecorder()
 			request   = httptest.NewRequest(http.MethodPost, "/", strings.NewReader(payload))

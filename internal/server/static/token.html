@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+	<title>Welcome, {{.GitHubUsername}}!</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+	<div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-gray-50 py-6 sm:py-12">
+		<div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto lg:w-1/2 md:w-11/12 sm:rounded-lg sm:px-10">
+			<div class="mx-auto">
+				<div class="divide-y divide-gray-300/50">
+					<div class="space-y-6 py-8 text-base leading-7 text-gray-900">
+						<img src="{{.GitHubAvatarURL}}" class="h-16 mx-auto self-center rounded-full" alt="Tailwind Play" />
+						<p class="text-center">Welcome, <strong>{{.GitHubUsername}}</strong></p>
+					</div>
+					<div class="space-y-6 py-8 text-base leading-7 text-gray-600">
+						<p>Use JWT token below to access the API.</p>
+						<div class="container break-all mx-auto bg-slate-50 p-5 border-2 border-slate-300 rounded-lg font-mono">{{.Token}}</div>
+						<p>Place it to <span class="font-mono">Authorization</span> header like this:</p>
+						<div class="container break-all mx-auto bg-slate-50 p-5 border-2 border-slate-300 rounded-lg font-mono">Authorization: Bearer &lt;token&gt;</div>
+					</div>
+					<div class="pt-8 text-base">
+						<p class="text-gray-900 font-semibold leading-7">Have some questions?</p>
+						<p>Feel free to contact us via Telegram: <a href="https://t.me/{{.TelegramContactUsername}}" class="text-sky-500 hover:text-sky-600">@{{.TelegramContactUsername}}</a></p>
+						<p>
+							or <a href="https://github.com/defer-panic/url-shortener-api/issues/new" class="text-sky-500 hover:text-sky-600">open issue on GitHub &rarr;</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

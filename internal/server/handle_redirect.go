@@ -32,7 +32,7 @@ func HandleRedirect(redirecter redirecter) echo.HandlerFunc {
 			}
 
 			log.Printf("error getting redirect url for %q: %v", identifier, err)
-			return err
+			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 
 		return c.Redirect(http.StatusMovedPermanently, redirectURL)

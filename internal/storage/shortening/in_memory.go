@@ -1,4 +1,4 @@
-package storage
+package shortening
 
 import (
 	"context"
@@ -16,18 +16,14 @@ func NewInMemory() *inMemory {
 	return &inMemory{}
 }
 
-func (s *inMemory) Put(_ context.Context, identifier string, url string) (*model.Shortening, error) {
-	if _, exists := s.m.Load(identifier); exists {
+func (s *inMemory) Put(_ context.Context, shortening model.Shortening) (*model.Shortening, error) {
+	if _, exists := s.m.Load(shortening.Identifier); exists {
 		return nil, model.ErrIdentifierExists
 	}
 
-	shortening := model.Shortening{
-		Identifier:  identifier,
-		OriginalURL: url,
-		CreatedAt:   time.Now().UTC(),
-	}
+	shortening.CreatedAt = time.Now().UTC()
 
-	s.m.Store(identifier, shortening)
+	s.m.Store(shortening.Identifier, shortening)
 
 	return &shortening, nil
 }

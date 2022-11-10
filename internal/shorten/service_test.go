@@ -6,7 +6,7 @@ import (
 
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/defer-panic/url-shortener-api/internal/storage"
+	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
 	. "github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ import (
 func TestService_Shorten(t *testing.T) {
 	t.Run("generates shortening for a given URL", func(t *testing.T) {
 		var (
-			svc   = shorten.NewService(storage.NewInMemory())
+			svc   = shorten.NewService(shortening.NewInMemory())
 			input = model.ShortenInput{RawURL: "https://www.google.com"}
 		)
 
@@ -31,7 +31,7 @@ func TestService_Shorten(t *testing.T) {
 		const identifier = "google"
 
 		var (
-			svc   = shorten.NewService(storage.NewInMemory())
+			svc   = shorten.NewService(shortening.NewInMemory())
 			input = model.ShortenInput{
 				RawURL:     "https://www.google.com",
 				Identifier: Some(identifier),
@@ -50,7 +50,7 @@ func TestService_Shorten(t *testing.T) {
 		const identifier = "google"
 
 		var (
-			svc   = shorten.NewService(storage.NewInMemory())
+			svc   = shorten.NewService(shortening.NewInMemory())
 			input = model.ShortenInput{
 				RawURL:     "https://www.google.com",
 				Identifier: Some(identifier),
@@ -70,7 +70,7 @@ func TestService_Redirect(t *testing.T) {
 		const identifier = "google"
 
 		var (
-			inMemoryStorage = storage.NewInMemory()
+			inMemoryStorage = shortening.NewInMemory()
 			svc             = shorten.NewService(inMemoryStorage)
 			input           = model.ShortenInput{
 				RawURL:     "https://www.google.com",
@@ -92,7 +92,7 @@ func TestService_Redirect(t *testing.T) {
 	})
 
 	t.Run("returns error if identifier is not found", func(t *testing.T) {
-		var svc = shorten.NewService(storage.NewInMemory())
+		var svc = shorten.NewService(shortening.NewInMemory())
 
 		_, err := svc.Redirect(context.Background(), "google")
 		assert.ErrorIs(t, err, model.ErrNotFound)

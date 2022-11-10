@@ -9,7 +9,7 @@ import (
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/server"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/defer-panic/url-shortener-api/internal/storage"
+	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
 	"github.com/labstack/echo/v4"
 	. "github.com/samber/mo"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +24,7 @@ func TestHandleRedirect(t *testing.T) {
 		)
 
 		var (
-			redirecter = shorten.NewService(storage.NewInMemory())
+			redirecter = shorten.NewService(shortening.NewInMemory())
 			handler    = server.HandleRedirect(redirecter)
 			recorder   = httptest.NewRecorder()
 			request    = httptest.NewRequest(http.MethodGet, "/"+identifier, nil)
@@ -57,7 +57,7 @@ func TestHandleRedirect(t *testing.T) {
 		)
 
 		var (
-			redirecter = shorten.NewService(storage.NewInMemory())
+			redirecter = shorten.NewService(shortening.NewInMemory())
 			handler    = server.HandleRedirect(redirecter)
 			recorder   = httptest.NewRecorder()
 			request    = httptest.NewRequest(http.MethodGet, "/"+identifier, nil)

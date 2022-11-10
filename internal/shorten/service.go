@@ -9,7 +9,7 @@ import (
 )
 
 type Storage interface {
-	Put(ctx context.Context, identifier, url string) (*model.Shortening, error)
+	Put(ctx context.Context, shortening model.Shortening) (*model.Shortening, error)
 	Get(ctx context.Context, identifier string) (*model.Shortening, error)
 	IncrementVisits(ctx context.Context, identifier string) error
 }
@@ -28,7 +28,22 @@ func (s *Service) Shorten(ctx context.Context, input model.ShortenInput) (*model
 		identifier = input.Identifier.OrElse(Shorten(id))
 	)
 
-	shortening, err := s.storage.Put(ctx, identifier, input.RawURL)
+	inputShortening := model.Shortening{
+		Identifier:  identifier,
+		OriginalURL: input.RawURL,
+		CreatedBy:   input.CreatedBy,
+	}
+
+	shortening, err := s.storage.Put(ctx, inputShortening)
+	if err != nil {
+		return nil, err
+	}
+
+	return shortening, nil
+}
+
+func (s *Service) Get(ctx context.Context, identifier string) (*model.Shortening, error) {
+	shortening, err := s.storage.Get(ctx, identifier)
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +57,9 @@ func (s *Service) Redirect(ctx context.Context, identifier string) (string, erro
 		return "", err
 	}
 
-	defer func() {
-		if err := s.storage.IncrementVisits(ctx, identifier); err != nil {
-			log.Printf("failed to increment visits for identifier %q: %v", identifier, err)
-		}
-	}()
+	if err := s.storage.IncrementVisits(ctx, identifier); err != nil {
+		log.Printf("failed to increment visits for identifier %q: %v", identifier, err)
+	}
 
 	return shortening.OriginalURL, nil
 }
