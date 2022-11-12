@@ -10,7 +10,7 @@ import (
 	"github.com/defer-panic/url-shortener-api/internal/config"
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	. "github.com/samber/mo"
 )

@@ -12,7 +12,7 @@ import (
 	"github.com/defer-panic/url-shortener-api/internal/server"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
 	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
