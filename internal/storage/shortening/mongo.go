@@ -25,6 +25,8 @@ func (m *mgo) col() *mongo.Collection {
 func (m *mgo) Put(ctx context.Context, shortening model.Shortening) (*model.Shortening, error) {
 	const op = "shortening.mgo.Put"
 
+	shortening.CreatedAt = time.Now().UTC()
+
 	count, err := m.col().CountDocuments(ctx, bson.M{"_id": shortening.Identifier})
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
@@ -60,7 +62,15 @@ func (m *mgo) Get(ctx context.Context, shorteningID string) (*model.Shortening, 
 func (m *mgo) IncrementVisits(ctx context.Context, shorteningID string) error {
 	const op = "shortening.mgo.IncrementVisits"
 
-	_, err := m.col().UpdateOne(ctx, bson.M{"_id": shorteningID}, bson.M{"$inc": bson.M{"visits": 1}})
+	var (
+		filter = bson.M{"_id": shorteningID}
+		update = bson.M{
+			"$inc": bson.M{"visits": 1},
+			"$set": bson.M{"updated_at": time.Now().UTC()},
+		}
+	)
+
+	_, err := m.col().UpdateOne(ctx, filter, update)
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}
