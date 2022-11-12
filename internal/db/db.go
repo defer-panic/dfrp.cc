@@ -3,15 +3,16 @@ package db
 import (
 	"context"
 
-	"github.com/edgedb/edgedb-go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DB struct {
-	client *edgedb.Client
+	client *mongo.Client
 }
 
 func Connect(ctx context.Context, dsn string) (*DB, error) {
-	client, err := edgedb.CreateClientDSN(ctx, dsn, edgedb.Options{TLSSecurity: "insecure"})
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dsn))
 	if err != nil {
 		return nil, err
 	}
@@ -19,25 +20,10 @@ func Connect(ctx context.Context, dsn string) (*DB, error) {
 	return &DB{client: client}, nil
 }
 
-func (d *DB) Client() *edgedb.Client {
+func (d *DB) Client() *mongo.Client {
 	return d.client
 }
 
 func (d *DB) Close(ctx context.Context) error {
-	var (
-		closeCh = make(chan struct{})
-		err     error
-	)
-
-	go func() {
-		err = d.client.Close()
-		closeCh <- struct{}{}
-	}()
-
-	select {
-	case <-closeCh:
-		return err
-	case <-ctx.Done():
-		return ctx.Err()
-	}
+	return d.client.Disconnect(ctx)
 }

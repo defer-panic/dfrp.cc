@@ -23,3 +23,8 @@ lint-fast: .install-linter
 .PHONY: test
 test:
 	go test -v --race --timeout=5m --cover ./...
+
+# === Build ===
+.PHONY: build
+build:
+	go build -o $(PROJECT_BIN)/url-shortener-api ./cmd/

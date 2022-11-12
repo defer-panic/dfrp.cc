@@ -10,7 +10,7 @@ import (
 	"github.com/defer-panic/url-shortener-api/internal/config"
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	. "github.com/samber/mo"
 )
@@ -59,7 +59,7 @@ func HandleShorten(shortener shortener) echo.HandlerFunc {
 		input := model.ShortenInput{
 			RawURL:     req.URL,
 			Identifier: identifier,
-			CreatedBy:  userClaims.User,
+			CreatedBy:  userClaims.User.GitHubLogin,
 		}
 
 		shortening, err := shortener.Shorten(c.Request().Context(), input)

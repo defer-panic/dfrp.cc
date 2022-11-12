@@ -1,23 +1,24 @@
 version: "3"
 services:
-  edgedb:
-    image: edgedb/edgedb:2.5
+  mongodb:
+    image: mongo:6.0.2
+    restart: always
     environment:
-      EDGEDB_SERVER_SECURITY: insecure_dev_mode
-      EDGEDB_SERVER_ADMIN_UI: enabled
-      EDGEDB_SERVER_PORT: 10700
+      - MONGODB_INITDB_ROOT_USERNAME=${MONGODB_INITDB_ROOT_USERNAME}
+      - MONGODB_INITDB_ROOT_PASSWORD=${MONGODB_INITDB_ROOT_PASSWORD}
     volumes:
-      - ./dbschema:/dbschema/
-      - edgedb_data:/var/lib/edgedb/data
+      - mongodb-data:/data/db
     ports:
-      - "10700:10700"
-  vault:
-    image: vault:1.12.1
+      - 27017:27017
+  mongodb-ui:
+    image: mongo-express
+    restart: always
     environment:
-      VAULT_ADDR: "http://0.0.0.0:8200"
-      VAULT_DEV_ROOT_TOKEN_ID: "dev-test-token"
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGODB_INITDB_ROOT_USERNAME}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGODB_INITDB_ROOT_PASSWORD}
+      - ME_CONFIG_MONGODB_URL=mongodb://mongodb:27017/
     ports:
-      - "8200:8200"
+      - 8081:8081
 
 volumes:
-  edgedb_data:
+  mongodb-data:

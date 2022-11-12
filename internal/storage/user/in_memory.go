@@ -5,8 +5,6 @@ import (
 	"sync"
 
 	"github.com/defer-panic/url-shortener-api/internal/model"
-	"github.com/edgedb/edgedb-go"
-	"github.com/google/uuid"
 )
 
 type inMemory struct {
@@ -18,7 +16,6 @@ func NewInMemory() *inMemory {
 }
 
 func (i *inMemory) CreateOrUpdate(_ context.Context, user model.User) (*model.User, error) {
-	user.ID = edgedb.UUID(uuid.New())
 	i.m.Store(user.GitHubLogin, user)
 	return &user, nil
 }
@@ -28,7 +25,7 @@ func (i *inMemory) Update(_ context.Context, user model.User) error {
 	return nil
 }
 
-func (i *inMemory) GetByGithubLogin(_ context.Context, login string) (*model.User, error) {
+func (i *inMemory) GetByGitHubLogin(_ context.Context, login string) (*model.User, error) {
 	if user, ok := i.m.Load(login); ok {
 		return user.(*model.User), nil
 	}

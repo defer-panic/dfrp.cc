@@ -7,10 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/defer-panic/url-shortener-api/internal/model"
 	"github.com/defer-panic/url-shortener-api/internal/server"
 	"github.com/defer-panic/url-shortener-api/internal/shorten"
 	"github.com/defer-panic/url-shortener-api/internal/storage/shortening"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -28,6 +30,8 @@ func TestHandleShorten(t *testing.T) {
 			e         = echo.New()
 			c         = e.NewContext(request, recorder)
 		)
+
+		addUserToCtx(c)
 
 		e.Validator = server.NewValidator()
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -55,6 +59,8 @@ func TestHandleShorten(t *testing.T) {
 			c         = e.NewContext(request, recorder)
 		)
 
+		addUserToCtx(c)
+
 		e.Validator = server.NewValidator()
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
@@ -76,6 +82,8 @@ func TestHandleShorten(t *testing.T) {
 			c         = e.NewContext(request, recorder)
 		)
 
+		addUserToCtx(c)
+
 		e.Validator = server.NewValidator()
 		request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
@@ -87,9 +95,24 @@ func TestHandleShorten(t *testing.T) {
 		recorder = httptest.NewRecorder()
 		c = e.NewContext(request, recorder)
 
+		addUserToCtx(c)
+
 		var httpErr *echo.HTTPError
 		require.ErrorAs(t, handler(c), &httpErr)
 		assert.Equal(t, http.StatusConflict, httpErr.Code)
 		assert.Contains(t, httpErr.Message, model.ErrIdentifierExists.Error())
 	})
+}
+
+func addUserToCtx(c echo.Context) {
+	c.Set(
+		"user",
+		&jwt.Token{
+			Claims: &model.UserClaims{
+				User: model.User{
+					GitHubLogin: gofakeit.Username(),
+				},
+			},
+		},
+	)
 }

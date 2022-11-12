@@ -24,14 +24,16 @@ func main() {
 	dbCtx, dbCancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer dbCancel()
 
-	edgeClient, err := db.Connect(dbCtx, config.Get().DB.DSN)
+	mgoClient, err := db.Connect(dbCtx, config.Get().DB.DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	mgoDB := mgoClient.Client().Database(config.Get().DB.Database)
+
 	var (
-		shorteningStorage = shortening.NewEdgeDB(edgeClient.Client())
-		userStorage       = user.NewEdgeDB(edgeClient.Client())
+		shorteningStorage = shortening.NewMongoDB(mgoDB)
+		userStorage       = user.NewMongoDB(mgoDB)
 		shortener         = shorten.NewService(shorteningStorage)
 		githubClient      = github.NewClient()
 		authenticator     = auth.NewService(
@@ -43,7 +45,7 @@ func main() {
 		srv = server.New(shortener, authenticator)
 	)
 
-	srv.AddCloser(edgeClient.Close)
+	srv.AddCloser(mgoClient.Close)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

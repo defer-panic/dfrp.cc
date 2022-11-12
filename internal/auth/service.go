@@ -13,7 +13,7 @@ import (
 type Storage interface {
 	CreateOrUpdate(context.Context, model.User) (*model.User, error)
 	Update(context.Context, model.User) error
-	GetByGithubLogin(context.Context, string) (*model.User, error)
+	GetByGitHubLogin(context.Context, string) (*model.User, error)
 	Deactivate(context.Context, string) error
 }
 

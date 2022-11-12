@@ -25,7 +25,8 @@ func (c Config) ListenAddr() string {
 }
 
 type DBConfig struct {
-	DSN string `env:"edgedb_dsn"`
+	DSN      string `env:"mongodb_dsn"`
+	Database string `env:"mongodb_database"`
 }
 
 type GitHubConfig struct {

@@ -21,12 +21,12 @@ func TestService_GitHubAuthCallback(t *testing.T) {
 				ExchangeCodeToAccessKeyFunc: func(ctx context.Context, clientID, clientSecret, code string) (string, error) {
 					return "access-key", nil
 				},
-				GetUserFunc: func(ctx context.Context, accessToken string) (*github.User, error) {
+				GetUserFunc: func(ctx context.Context, accessToken, user string) (*github.User, error) {
 					return &github.User{
 						Login: github.String(gofakeit.Username()),
 					}, nil
 				},
-				IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+				IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 					return true, nil
 				},
 			}
@@ -64,12 +64,12 @@ func TestService_GitHubAuthCallback(t *testing.T) {
 					ExchangeCodeToAccessKeyFunc: func(ctx context.Context, clientID, clientSecret, code string) (string, error) {
 						return "access-key", nil
 					},
-					GetUserFunc: func(ctx context.Context, accessToken string) (*github.User, error) {
+					GetUserFunc: func(ctx context.Context, accessToken, user string) (*github.User, error) {
 						return &github.User{
 							Login: github.String(gofakeit.Username()),
 						}, nil
 					},
-					IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+					IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 						return false, errors.New("is member error")
 					},
 				}
@@ -89,7 +89,7 @@ func TestService_GitHubAuthCallback(t *testing.T) {
 					ExchangeCodeToAccessKeyFunc: func(ctx context.Context, clientID, clientSecret, code string) (string, error) {
 						return "access-key", nil
 					},
-					GetUserFunc: func(ctx context.Context, accessToken string) (*github.User, error) {
+					GetUserFunc: func(ctx context.Context, accessToken, user string) (*github.User, error) {
 						return nil, errors.New("get user error")
 					},
 				}
@@ -110,7 +110,7 @@ func TestService_RegisterUser(t *testing.T) {
 		t.Run("when user is member of the organization", func(t *testing.T) {
 			var (
 				ghClient = &auth.GitHubClientMock{
-					IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+					IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 						return true, nil
 					},
 				}
@@ -128,7 +128,7 @@ func TestService_RegisterUser(t *testing.T) {
 		t.Run("even if user already exists", func(t *testing.T) {
 			var (
 				ghClient = &auth.GitHubClientMock{
-					IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+					IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 						return true, nil
 					},
 				}
@@ -155,7 +155,7 @@ func TestService_RegisterUser(t *testing.T) {
 		t.Run("when user is not a member of the organization", func(t *testing.T) {
 			var (
 				ghClient = &auth.GitHubClientMock{
-					IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+					IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 						return false, nil
 					},
 				}
@@ -172,7 +172,7 @@ func TestService_RegisterUser(t *testing.T) {
 		t.Run("when github client returns error", func(t *testing.T) {
 			var (
 				ghClient = &auth.GitHubClientMock{
-					IsMemberFunc: func(ctx context.Context, org, user string) (bool, error) {
+					IsMemberFunc: func(ctx context.Context, accessToken, org, user string) (bool, error) {
 						return false, nil
 					},
 				}
