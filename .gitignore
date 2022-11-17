@@ -33,3 +33,6 @@ go.work
 /.dbschema/
 .env
 /bin/
+
+/tests/*.cov
+/tests/*.cov_tmp

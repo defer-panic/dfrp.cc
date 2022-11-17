@@ -14,6 +14,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestGetGitHubAuthLink(t *testing.T) {
+	t.Run("returns github auth link with client id", func(t *testing.T) {
+		svc := auth.NewService(nil, nil, "client-id", "")
+		assert.Equal(
+			t,
+			"https://github.com/login/oauth/authorize?scopes=user,read:org&client_id=client-id",
+			svc.GitHubAuthLink(),
+		)
+	})
+}
+
 func TestService_GitHubAuthCallback(t *testing.T) {
 	t.Run("returns user model and JWT", func(t *testing.T) {
 		var (

@@ -19,10 +19,24 @@ lint: .install-linter
 lint-fast: .install-linter
 	$(GOLANGCI_LINT) run ./... --fast --config=./.golangci.yml
 
+TESTS_WD = $(PROJECT_DIR)/tests
+
 # === Test ===
 .PHONY: test
 test:
-	go test -v --race --timeout=5m --cover ./...
+	mkdir -p $(TESTS_WD)
+	go test -v --timeout=5m --covermode=count --coverprofile=$(TESTS_WD)/profile.cov_tmp ./...
+	cat $(TESTS_WD)/profile.cov_tmp | grep -v "mocks" | grep -v "_mock" | grep -v "mock_" \
+	| grep -v ".mock." | grep -v "server.go" | grep -v "handle_token_page.go" \
+	| grep -v "handle_gh_oauth_callback.go" | grep -v "handle_get_gh_auth_link.go" > $(TESTS_WD)/profile.cov
+
+.PHONY: test-coverage
+test-coverage: test
+	go tool cover --func=$(TESTS_WD)/profile.cov 
+
+.PHONY: test-coverage-html
+test-coverage-html: test
+	go tool cover --html=$(TESTS_WD)/profile.cov 
 
 # === Build ===
 .PHONY: build
