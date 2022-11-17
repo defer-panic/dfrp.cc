@@ -69,7 +69,6 @@ func TestHandleRedirect(t *testing.T) {
 		c.SetParamNames("identifier")
 		c.SetParamValues(identifier)
 
-		require.NoError(t, handler(c))
-		assert.Equal(t, http.StatusNotFound, recorder.Code)
+		require.Error(t, handler(c))
 	})
 }

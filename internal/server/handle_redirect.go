@@ -10,10 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type redirectResponse struct {
-	Message string `json:"message,omitempty"`
-}
-
 type redirecter interface {
 	Redirect(ctx context.Context, identifier string) (string, error)
 }
@@ -25,10 +21,7 @@ func HandleRedirect(redirecter redirecter) echo.HandlerFunc {
 		redirectURL, err := redirecter.Redirect(c.Request().Context(), identifier)
 		if err != nil {
 			if errors.Is(err, model.ErrNotFound) {
-				return c.JSON(
-					http.StatusNotFound,
-					redirectResponse{Message: err.Error()},
-				)
+				return echo.NewHTTPError(http.StatusNotFound)
 			}
 
 			log.Printf("error getting redirect url for %q: %v", identifier, err)

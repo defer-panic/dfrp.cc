@@ -64,21 +64,12 @@ func HandleShorten(shortener shortener) echo.HandlerFunc {
 
 		shortening, err := shortener.Shorten(c.Request().Context(), input)
 		if err != nil {
-			var (
-				status = http.StatusInternalServerError
-				msg    = err.Error()
-			)
-			switch {
-			case errors.Is(err, model.ErrInvalidURL):
-				status = http.StatusBadRequest
-			case errors.Is(err, model.ErrIdentifierExists):
-				status = http.StatusConflict
-			default:
-				log.Printf("error shortening url %q: %v", req.URL, err)
-				msg = http.StatusText(status)
+			if errors.Is(err, model.ErrIdentifierExists) {
+				return echo.NewHTTPError(http.StatusConflict, model.ErrIdentifierExists.Error())
 			}
 
-			return echo.NewHTTPError(status, msg)
+			log.Printf("error shortening url %q: %v", req.URL, err)
+			return echo.NewHTTPError(http.StatusInternalServerError)
 		}
 
 		shortURL, err := shorten.PrependBaseURL(config.Get().BaseURL, shortening.Identifier)
