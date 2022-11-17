@@ -1,0 +1,62 @@
+# This workflow runs checks againts pull request or current codebase at master branc
+name: checks
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+        
+    - name: lint
+      run: make lint
+  
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+      
+    - name: test
+      run: |
+          go test -v -timeout=100s -covermode=count -coverprofile=$GITHUB_WORKSPACE/profile.cov_tmp ./...
+          cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "mocks" | grep -v "_mock" | grep -v "mock_" | grep -v ".mock." > $GITHUB_WORKSPACE/profile.cov
+    
+    - name: install goveralls
+      run: GO111MODULE=off go get -u github.com/mattn/goveralls
+      
+    - name: submit coverage
+      run: $(go env GOPATH)/bin/goveralls -service="github" -coverprofile=$GITHUB_WORKSPACE/profile.cov
+      env:
+        COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+      
+    - name: Test
+      run: make build
+
+    
