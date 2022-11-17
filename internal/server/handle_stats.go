@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 
@@ -18,6 +19,10 @@ func HandleStats(provider shorteningProvider) echo.HandlerFunc {
 		identifier := c.Param("identifier")
 		shortening, err := provider.Get(c.Request().Context(), identifier)
 		if err != nil {
+			if errors.Is(err, model.ErrNotFound) {
+				return echo.NewHTTPError(http.StatusNotFound)
+			}
+
 			log.Printf("failed to get shortening: %v", err)
 			return echo.NewHTTPError(http.StatusInternalServerError, "failed to get shortening")
 		}
