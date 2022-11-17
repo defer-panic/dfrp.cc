@@ -35,7 +35,7 @@ jobs:
     - name: test
       run: |
           go test -v -timeout=100s -covermode=count -coverprofile=$GITHUB_WORKSPACE/profile.cov_tmp ./...
-          cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "mocks" | grep -v "_mock" | grep -v "mock_" | grep -v ".mock." > $GITHUB_WORKSPACE/profile.cov
+          cat $GITHUB_WORKSPACE/profile.cov_tmp | grep -v "mocks" | grep -v "_mock" | grep -v "mock_" | grep -v ".mock." | grep -v "server.go" | grep -v "handle_token_page.go" |grep -v "handle_get_gh_auth_link.go" > $GITHUB_WORKSPACE/profile.cov
     
     - name: install goveralls
       run: GO111MODULE=off go get -u github.com/mattn/goveralls
